@@ -15,7 +15,7 @@ library(dplyr)
 # Datos ----
 datos<- read_excel("C:/Users/ASUS/Downloads/forestfires_1_.xlsx")
 
-# Estructura de los datos ----
+# Estructura de los datos 
 dim(datos)
 colnames(datos)
 str(datos)
@@ -30,7 +30,7 @@ missmap(datos)
 # Crear data frame
 df <- as.data.frame(datos)
 
-# Analisis de la variable weekly sales ----
+# Análisis de la variable área ----
 
 df %>%
   summarise(n=length(area), 
@@ -51,6 +51,43 @@ df %>%
 
 df %>%
   ggplot(aes(x = "", y = area)) +
+  geom_boxplot(fill = "#a6cee3", color = "#1f78b4", outlier.color = "red") +
+  stat_summary(
+    fun = mean,
+    geom = "point",
+    shape = 20,
+    size = 3,
+    color = "black"
+  ) +
+  labs(
+    title = "Diagrama de cajas y bigotes de área quemada",
+    x = "",
+    y = "Área quemada"
+  ) +
+  theme_bw()
+
+df <- df %>%
+  mutate(area_log = log1p(area))
+
+df %>%
+  summarise(n=length(area_log), 
+            prom = mean(area_log),
+            ds = sd(area_log),
+            mediana = median(area_log),
+            RIC = IQR(area_log),
+            minimo = min(area_log),
+            maximo = max(area_log),
+            Q1 = quantile(area_log, 0.25),
+            Q3 = quantile(area_log, 0.75))
+
+df %>%
+  ggplot(aes(x=area_log)) + 
+  geom_histogram(aes(y=after_stat(density))) + 
+  geom_density(color="blue") + 
+  theme_bw()
+
+df %>%
+  ggplot(aes(x = "", y = area_log)) +
   geom_boxplot(fill = "#a6cee3", color = "#1f78b4", outlier.color = "red") +
   stat_summary(
     fun = mean,
@@ -376,4 +413,8 @@ g2 <- df %>%
 bind_rows(agrup_month, agrup_day)
 g1 / g2
 
+
+# GGally
+df %>% 
+  ggpairs()
 
